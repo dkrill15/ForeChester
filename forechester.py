@@ -12,36 +12,6 @@ from functions import *
 app = Flask(__name__)
 CORS(app)
 
-# def parse_csv(file_path):
-#     data_dict = {}
-#     current_segment = None
-#     current_year = None
-
-#     with open(file_path, 'r') as csvfile:
-#         reader = csv.reader(csvfile)
-
-#         for row in reader:
-#             if not row:  # Skip empty rows
-#                 continue
-
-#             if 'age' in row:  # Header row
-#                 headers = row
-#             elif len(row) == 1:  # Segment or Year row
-#                 if row[0].isdigit():  # Year row
-#                     current_year = row[0]
-#                 else:  # Segment row
-#                     current_segment = row[0]
-#                     data_dict[current_segment] = {}
-#             else:  # Data row
-#                 if current_year not in data_dict[current_segment]:
-#                     data_dict[current_segment][current_year] = {
-#                         header: [] for header in headers}
-
-#                 for i, value in enumerate(row):
-#                     data_dict[current_segment][current_year][headers[i]].append(
-#                         float(value))
-#     return data_dict
-
 @app.route('/score')
 def score(prc=0, seg=0, rvm=0, mto=0, mtn=0, ago=0, szo=0, szn=0, pfo=0, pfn=0, prm=0, awa=0, sal=0, acc=0, arp=0, test=0, rd=0, up=1):
     # get preferences for each segment
