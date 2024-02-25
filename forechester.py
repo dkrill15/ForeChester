@@ -31,9 +31,8 @@ def make_xml_response(avgs, wscores):
 @app.route('/score')
 def score(prc=0, seg=0, rvm=0, mto=0, mtn=0, ago=0, szo=0, szn=0, pfo=0, pfn=0, prm=0, awa=0, sal=0, acc=0, arp=0, test=0, rd=0, up=1, new=0, debug=0, run=0):
 
-    #new commnet on new branch
-
-    # moren ew commmee
+    # new enw new stuff
+    # change to add in forecheester
     
     # get preferences for each segment
     file_path = 'couriers/json_prefs/round' + str(rd) + 'prefs.json'
