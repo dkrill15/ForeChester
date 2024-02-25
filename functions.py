@@ -89,17 +89,58 @@ def get_position_score(revision_month: int, size_pref: float, pfmn_pref: float, 
             }
         }
     }
+    rads = {
+        'traditional': [
+            0, .4, .6, .8, 1.1, 1.3, 1.55, 1.85, 2.15, 2.6
+        ], 
+        'low-end': [
+            0, .6, .9, 1.2, 1.4, 1.7, 1.9, 2.2, 2.8, 3.7
+        ],
+        'high-end': [
+            0, 1, 1.4, 1.8, 2.1, 2.5, 2.9, 3.4, 4.1, 4.7
+        ],
+        'performance': [
+            0, 1, 1.4, 1.8, 2.1, 2.5, 2.9, 3.4, 4.1, 4.7
+        ],
+        'size': [
+            0, 1, 1.4, 1.8, 2.1, 2.5, 2.9, 3.4, 4.1, 4.7
+        ]
+    }
 
     # our product - updates at most once during year
     curr_product = np.array([old_pfmn, old_size])
     ideal_pfmn = pfmn_pref * 1.00000
     ideal_size = size_pref * 1.00000
-    curr_pfmn = ideal_pfmn - drifts['ideal'][seg]['pfmn']
-    curr_size = ideal_size - drifts['ideal'][seg]['size']
+    # TODO: see if is calculated in middle of month or end of month
+    curr_pfmn = ideal_pfmn - drifts['ideal'][seg]['pfmn'] 
+    curr_size = ideal_size - drifts['ideal'][seg]['size'] 
 
     mult = 1
     for_plot = [[13, curr_product]]
     centers = []
+
+    def base_performance(curr_product, segment_center):
+        dist_to_center = distance(segment_center, curr_product)
+        score, mult = 0, 1
+        if round_to_nearest_half(dist_to_center) >= 4:
+            score = 0
+        # between rough and fine (orange)
+        elif dist_to_center >= 2.5:
+            score = ((4 - dist_to_center) / 1.5) * .1  # rought weighting
+            mult = score / .1
+        # in fine cut
+        else:
+            segment_ideal = np.array(
+                [curr_pfmn + drifts['ideal'][seg]['pfmn'], curr_size + drifts['ideal'][seg]['size']])
+            dist_to_ideal = distance(segment_ideal, curr_product)
+
+            def get_score_from_distance_to_ideal(dist_to_ideal, rads):
+                for index, rad in enumerate(rads):
+                    if dist_to_ideal < rad:
+                        return (rad - dist_to_ideal) / (rad - rads[index-1]) * .1 + .1 * (len(rads) - index)
+            score = get_score_from_distance_to_ideal(dist_to_ideal, rads[seg])
+        return score, mult
+
     for i in range(1, 13):
         # update product
         if i == revision_month:
@@ -111,50 +152,31 @@ def get_position_score(revision_month: int, size_pref: float, pfmn_pref: float, 
         curr_size += drifts['center'][seg]['size'] / 12
         segment_center = np.array([curr_pfmn, curr_size])
 
-        # score based on orange/green circle graph
-        # outside_rough cut
-        dist_to_center = distance(segment_center, curr_product)
+        score, mult = base_performance(curr_product, segment_center)
+
         centers.append([i, segment_center])
-
-        if round_to_nearest_half(dist_to_center) >= 4:
-            score = 0
-        # between rough and fine (orange)
-        elif dist_to_center >= 2.5:
-            score = ((4 - dist_to_center) / 1.5) * .1  # rought weighting
-            mult = score / .1
-        # in fine cut
-        else:
-            # distance from ideal
-
-            segment_ideal = np.array(
-                [curr_pfmn + drifts['ideal'][seg]['pfmn'], curr_size + drifts['ideal'][seg]['size']])
-            dist_to_ideal = distance(segment_ideal, curr_product)
-            # iddist = dist_to_ideal
-
-            ideal_rad = distance(segment_ideal, segment_center) + 2.5
-            # score = (ideal_rad - distance(segment_ideal, curr_product)) / ideal_rad
-            # steepness = .9  # Controls the steepness of the sigmoid curve
-            # score = 1 / (1 + math.exp(steepness * (dist_to_ideal - ideal_rad/2) / ideal_rad))
-            if dist_to_ideal < .9:
-                score = (.9 - dist_to_ideal) / .9 * .1 + .9
-            elif dist_to_ideal < 2.8:
-                score = (2.8 - dist_to_ideal) / (2.8 - .9) * (.9 - .4) + .4
-            elif dist_to_ideal < 3.3:
-                score = (3.3 - dist_to_ideal) / (3.3 - 2.8) * (.4 - .3) + .3
-            elif dist_to_ideal < 4:
-                score = (4 - dist_to_ideal) / (4 - 3.3) * (.3 - .2) + .2
-            else:
-                score = (ideal_rad - dist_to_ideal) / (.2 - .1) + 1
-            # score = (ideal_rad - dist_to_ideal) / ideal_rad + .15
-            # score = 1 if score > 1 else score
-            # print('fine cut', ideal_rad, "center", segment_center, "\t\tideal", segment_ideal, curr_product, dist_to_ideal)
-            mult = 1
-            # TODO
-            # add to plot data at every iteration
-            for_plot.append([i, segment_ideal])
-
         scores.append(score)
         mults.append(mult)
+
+
+    if test:
+        test_scores = []
+        plt.plot([curr_pfmn], [curr_size], 'ro')
+
+        x = np.arange(int(curr_pfmn - 5), int(curr_pfmn + 6), .0625)
+        y = np.arange(int(curr_size - 5), int(curr_size + 6), .0625)
+        to_graph = []
+        for ex in x:
+            for why in y:
+                test_scores.append(base_performance( [ex, why],
+                    [curr_pfmn, curr_size])[0])
+                to_graph.append([ex, why])
+                # if test_scores[-1] > .75:
+                #     print(ex, why, test_scores[-1])
+        plt.scatter([a[0] for a in to_graph], [a[1] for a in to_graph], c=test_scores, cmap='viridis', s=10)
+        plt.title('Base Performance with center at {} (December 31)'.format([curr_pfmn, curr_size]))
+        plt.show()
+        exit()
 
     # graph for visual debugging
     if test:
@@ -185,7 +207,7 @@ def get_position_score(revision_month: int, size_pref: float, pfmn_pref: float, 
         ax.set_title(seg)
         fig.show()
 
-    return scores, mults, iddist
+    return scores, mults
 
 def get_mtbf_score(revision_month: int, prefs: list, old_mtbf: int, new_mtbf: int):
     low = prefs['low']
@@ -219,11 +241,11 @@ def get_mtbf_score(revision_month: int, prefs: list, old_mtbf: int, new_mtbf: in
     return scores
 
 
-def get_age_score(revision_month: int, prefs: list, old_age: float, seg: str, update: int):
+def get_age_score(revision_month: int, old_age: float, seg: str, update: int, test: int = 0):
     equation_params = {
         'low-end': {
             'center': 7,
-            'spread': 8
+            'spread': 7.5
         },
         'high-end': {
             'center': 0,
@@ -231,11 +253,11 @@ def get_age_score(revision_month: int, prefs: list, old_age: float, seg: str, up
         },
         'traditional': {
             'center': 2,
-            'spread': 3
+            'spread': 3.6
         },
         'size': {
             'center': 1.5,
-            'spread': 1.2
+            'spread': 3.2
         },
         'performance': {
             'center': 1,
@@ -246,10 +268,21 @@ def get_age_score(revision_month: int, prefs: list, old_age: float, seg: str, up
     # bell curve around center with stdev of spread
     def base_age(age):
         res = math.exp(-(age - equation_params[seg]['center'])
-                       ** 2 / equation_params[seg]['spread'])
+                       ** 2 / equation_params[seg]['spread'] * 1.5)
         if age < equation_params[seg]['center'] - equation_params[seg]['spread'] / 2 or age > equation_params[seg]['center'] + equation_params[seg]['spread'] / 2:
-            res *= .6
+            res *= .4
         return res
+    
+
+
+    if test:
+        # make scatter graph with x as range from 0 to 7 with step .25 and y as base_age(x)
+        x = np.arange(0, 10, .125)
+        y = [base_age(i) for i in x]
+        plt.plot(x, y)
+        plt.show()
+        exit()
+
 
     scores = []
     score = 0
@@ -264,14 +297,17 @@ def get_age_score(revision_month: int, prefs: list, old_age: float, seg: str, up
         scores.append(score)
     return scores
 
-def get_awareness_increase(budget: float):
+def get_awareness_increase(budget: float, new: bool = False):
     def f(x, a, c, b, d):
         return a + (c - a) * np.exp(-1 * np.exp(b * (x - d)))
 
     if budget < 0:
         return .25
-
+    
     extra_pct = f(budget/100, -1.4, 49.2, -.16, 8.3) / 100
+
+    if new:
+        extra_pct += .25
     return extra_pct
 
 def get_accessibility_increase(budget: float, num_products: int):

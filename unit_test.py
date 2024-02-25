@@ -1,5 +1,5 @@
 from functions import *
-
+from forechester import score
 # original_str = "$C$34, P14/$C$40 * ($C$35*$C$36^C41) / 12,"
 
 # # Replacements for 'c'
@@ -22,7 +22,7 @@ from functions import *
 def unit_test_pos():
     # res, mult = get_position_score(7, 10.2, 9.8, 0, 10.2, 0, 9.8, "high-end")
     res, mult, tv = get_position_score(
-        3, 9.6, 4.7, 10, 10.2, 4, 4.2, "size", 1)
+        0, 9.3, 10.7, 3, 17, 3, 17,"high-end", 1)
     print("\nUnit Test Data")
     for i, r in enumerate(res):
         print(i + 1, r)
@@ -30,7 +30,7 @@ def unit_test_pos():
 
 
 def unit_test_age():
-    res = get_age_score(6, 2, 2.41, "traditional", 1)
+    res = get_age_score(6, 2.41, "low-end", 1, 1)
     print(res)
 
 
@@ -44,4 +44,5 @@ def unit_test_marketing():
         print(i, get_accessibility_increase(i, 2))
 
 
-unit_test_age()
+# unit_test_product(name, industry, rd):
+#     product = 

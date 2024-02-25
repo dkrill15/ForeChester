@@ -16,7 +16,7 @@ def naming(attr):
 def parse_html_prefs(rd):
     print("Parsing Segments from HTML...")
     data_dicts = []  # List to store all dictionaries from each table
-    with open('pround'+str(rd)+'.html', 'r', encoding="UTF-8") as file:
+    with open('couriers/html/round'+str(rd)+'.html', 'r', encoding="UTF-8") as file:
         html_content = file.read()
     soup = BeautifulSoup(html_content, 'html.parser')
 
