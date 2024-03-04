@@ -16,6 +16,9 @@ Predict customer suvey score to forecast for market share and total units produc
 
 - To test the accuracy of the prediction function, run `python3 tester.py` along with the necessary command line input. This loads all product data for an industry and compares predictions against actual results. There will be terminal output for each prediction, MoM data for fine-grained inspection, and a graph of all products located in `accuracy_graph.html`. Use the product index from hover data on graph or index in dataframe to select a product for fine-grained output.
 
+- Sample Accuracy Test for Industry 93
+![Screenshot 2024-03-04 at 9 53 58 AM](https://github.com/dkrill15/ForeChester/assets/71748033/f7561699-5431-47c4-84d6-46aec6f6e775)
+
 ### Files ###
 
 ##### forechester.py #####
