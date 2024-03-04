@@ -1,4 +1,4 @@
-**Forechester**
+# Forechester #
 
 Customer Survey Score predictor for CapSim
 Calculates customer survey scores for each product month.
