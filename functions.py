@@ -217,16 +217,25 @@ def get_mtbf_score(revision_month: int, prefs: list, old_mtbf: int, new_mtbf: in
     def base_mtbf(x: float):
         if x < low - 5000:
             return 0
+        elif x < low:
+            return (x - (low - 5000)) / (low - (low - 5000))* .1
         elif x >= high:
             return 1
         else:
-            return (.28 * (x/1000 - (low/1000 - 1)) ** 2) / 10
+            return (x - low) / (high - low) * .9 + .1
+            #return (.28 * (x/1000 - (low/1000 - 1)) ** 2) / 10
 
     # def base_mtbf(mtbf):
     #     temp = (mtbf - low) / (high - low)
     #     if temp < 0 : temp = 0
     #     if temp > 1 : temp = 1
     #     return temp
+
+    # x = np.arange(low-5000, high+1000, 1000)
+    # y = [base_mtbf(i) for i in x]
+    # plt.plot(x, y)
+    # plt.show()
+
 
     scores = []
     score = 0
@@ -241,7 +250,7 @@ def get_mtbf_score(revision_month: int, prefs: list, old_mtbf: int, new_mtbf: in
     return scores
 
 
-def get_age_score(revision_month: int, old_age: float, seg: str, update: int, test: int = 0):
+def get_age_score(revision_month: int, old_age: float, seg: str, update: int, test: int = 0, new_product: bool = False, debug: int=0):
     equation_params = {
         'low-end': {
             'center': 7,
@@ -273,15 +282,12 @@ def get_age_score(revision_month: int, old_age: float, seg: str, update: int, te
             res *= .4
         return res
     
-
-
-    if test:
-        # make scatter graph with x as range from 0 to 7 with step .25 and y as base_age(x)
-        x = np.arange(0, 10, .125)
-        y = [base_age(i) for i in x]
-        plt.plot(x, y)
-        plt.show()
-        exit()
+    # if debug:
+    #     # make scatter graph with x as range from 0 to 7 with step .25 and y as base_age(x)
+    #     x = np.arange(0, 10, .125)
+    #     y = [base_age(i) for i in x]
+    #     plt.plot(x, y)
+    #     plt.show()
 
 
     scores = []
@@ -290,9 +296,14 @@ def get_age_score(revision_month: int, old_age: float, seg: str, update: int, te
     # assume old_age (listed on courier) is the age for december of last year
     current_age = old_age
     for i in range(1, 13):
+        if debug:
+            print(current_age)
         current_age += (1/12)
         if i == revision_month and update:
-            current_age /= 2
+            if new_product:
+                current_age = 0
+            else:
+                current_age /= 2
         score = base_age(current_age)
         scores.append(score)
     return scores
@@ -335,3 +346,6 @@ def get_ar_effect(days: float):
         return .993
     else:
         return 1
+
+def is_in_rough_cut(seg: str, prc: float, pfmn: float, size: float):
+    return seg in ['low-end', 'high-end', 'traditional']

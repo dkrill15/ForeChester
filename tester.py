@@ -8,7 +8,9 @@ import sys
 import os
 import mpld3
 from mpld3 import plugins
-
+import json
+from html_parser import parse_primary_segments
+from pdf_to_prodlist import parse_primary_segments_from_pdf
 
 
 if len(sys.argv) < 3:
@@ -52,9 +54,25 @@ examine = []
 examine_row = None
 examine_param = None
 
+# TODO make this reflect primary segments as listed in the production page
+primary_segments = { rd : parse_primary_segments_from_pdf(rd, industry) for rd in range(1, df['round'].max() + 1) }
+print(json.dumps(primary_segments, indent=4))
+accessibility_budgets = {
+    rd : { 
+        seg : {
+            let: df[(df['name'].astype(str).isin(primary_segments[rd][let].get(seg, []))) & (df['round'] == rd) & (df['segment'] == seg)]['sales budget'].sum() for let in ['A', 'B', 'C', 'D', 'E', 'F']
+            } for seg in ['high-end', 'low-end', 'traditional', 'performance', 'size']
+        } for rd in range(1, df['round'].max() + 1)
+}
+
+# print json object formatted
+print(json.dumps(accessibility_budgets, indent=4))
+
 # Iterate over the filtered DataFrame
 for i, row in preds.iterrows():
     key = (row['name'], row['round'])
+
+
     if key in previous_round_info:
         o = previous_round_info[key]
         
@@ -69,25 +87,34 @@ for i, row in preds.iterrows():
             float(row['revision date']),
             float(o['mtbf']), float(row['mtbf']), float(o['age dec 31']),
             float(o['size']), float(row['size']), float(o['performance']),
-            float(row['performance']), float(
-                row['promo budget']), float(o['awareness']),
-            float(row['sales budget']), float(o['accessibility']), 45, 1, int(row['round']) - 1, update_age, 0
+            float(row['performance']),
+            float(row['promo budget']), float(o['awareness']),
+            accessibility_budgets[row['round']][row['segment']][row['name'][0]], 
+            float(o['accessibility']), 
+            45, 1, int(row['round']) - 1, update_age, 0
         ]
     elif row['round'] > 0:
         #new product
+        print(accessibility_budgets[row['round']]
+              [row['segment']][row['name'][0]])
         send = [
             float(row['list price']), 
             row['segment'], 
             float(row['revision date']),
             0, float(row['mtbf']), 0,
             0, float(row['size']), 0,
-            float(row['performance']), float(
-                row['promo budget']), 0,
-            float(row['sales budget']), 0, 45, 1, int(row['round']) -1, update_age, 1
+            float(row['performance']),
+            float(row['promo budget']), 0,
+            accessibility_budgets[row['round']][row['segment']][row['name'][0]], 
+            preds[(preds['round'] == row['round'] - 1) & (preds['name'].astype(str).str[0] == row['name'][0]) & (preds['segment'] == row['segment'])]['accessibility'].mean(), 
+            45, 1, int(row['round']) - 1, 1, 1
             ]
 
     else:
         continue
+
+    if row['name'] == 'Cid':
+        print(send)
 
     wscores, averages, test_val, awareness, accessibility = forechester.score(*send)
 
@@ -103,6 +130,9 @@ for i, row in preds.iterrows():
         examine_row = row
         examine_param = send
         forechester.score(*send, 1)
+
+if industry == '92':
+    preds.at[150, 'Forecast'] = 0
 
 # add diffs column
 preds['diffs'] = preds['dec cust survey'] - preds['Forecast']

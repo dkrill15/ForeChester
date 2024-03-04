@@ -1,0 +1,46 @@
+        {   
+        "ideal": {
+            "traditional": {
+                "size": 0.0,
+                "pfmn": 0.0
+        },
+            "low-end": {
+                "pfmn": -0.8,
+                "size": 0.8
+        },
+            "high-end": {
+                "pfmn": 1.4,
+                "size": -1.4
+        },
+            "performance": {
+                "pfmn": 1.4,
+                "size": -1
+        },
+            "size": {
+                "pfmn": 1,
+                "size": -1.4
+        }
+    },
+        "center": {
+            "traditional": {
+                "pfmn": 0.7,
+                "size": -0.7
+        },
+            "low-end": {
+                "pfmn": 0.5,
+                "size": -0.5
+        },
+            "high-end": {
+                "pfmn": 0.9,
+                "size": -0.9
+        },
+            "performance": {
+                "pfmn": 1.0,
+                "size": -0.7
+        },
+            "size": {
+                "pfmn": 0.7,
+                "size": -1.0
+        }
+    }
+}
