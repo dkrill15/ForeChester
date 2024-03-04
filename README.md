@@ -18,8 +18,8 @@ Predict customer suvey score to forecast for market share and total units produc
 
 - Sample Accuracy Test for Industry 93
 ![Screenshot 2024-03-04 at 9 53 58 AM](https://github.com/dkrill15/ForeChester/assets/71748033/f7561699-5431-47c4-84d6-46aec6f6e775)
-- Sample Dashboard Test for Size Segment in Round 3 of Industry 92
-![Screenshot 2024-03-04 at 9 59 00 AM](https://github.com/dkrill15/ForeChester/assets/71748033/0fd75ea1-35aa-4d3f-a5b9-136d041eda27)
+- Sample Dashboard Test for Performance Segment in Round 3 of Industry 92
+![Screenshot 2024-03-04 at 10 26 28 AM](https://github.com/dkrill15/ForeChester/assets/71748033/c52f5dfc-ee49-4c35-8c93-0dbb33f899ec)
 
 ### Files ###
 
