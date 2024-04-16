@@ -84,8 +84,9 @@ def load_market_data(soup, segment: str = ""):
 
 
 def load(round_no: int = 0, segment: str = "", team_letter: str = ""):
-    file_path = 'couriers/json_prefs/round' + str(round_no) + 'prefs.json'
-    if os.path.exists(file_path):
+    # file_path = 'couriers/json_prefs/round' + str(round_no) + 'prefs.json'
+    # if os.path.exists(file_path):
+    if os.path.exists('couriers/html/round' + str(round_no) + '.html'):
         with open('couriers/html/round' + str(round_no) + '.html', 'r', encoding="UTF-8") as file:
             html_content = file.read()
     else:
@@ -94,8 +95,8 @@ def load(round_no: int = 0, segment: str = "", team_letter: str = ""):
 
     front_page = soup.find('a', attrs={'name': 'frontpage'}).find_all('td')[
         2].find('b')
-    round_no, round_ending = [text for text in front_page.stripped_strings]
-    round_no = int(round_no.split()[1])
+    # round_no, round_ending = [text for text in front_page.stripped_strings]
+    # round_no = int(round_no.split()[1])
 
 
     segment_df, our_products = parse_segments(soup, team_letter)
@@ -112,6 +113,8 @@ def load(round_no: int = 0, segment: str = "", team_letter: str = ""):
         seg_prefs = parse_html_prefs(round_no, segment)
     
     demand, growth_rate = load_market_data(soup, segment)
+
+    print(json.dumps(segment_df, indent=4))
 
 
     return segment_df[segment], seg_prefs[segment], demand, growth_rate

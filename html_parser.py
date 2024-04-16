@@ -109,7 +109,9 @@ def parse_html_prefs(rd, segment):
         # Writing the dictionary to a JSON file
     file_path = 'couriers/json_prefs/round'+str(rd)+'prefs.json'  # Adjust the file path as needed
     with open(file_path, 'w') as file:
+        # Write the dictionary to the file
         json.dump(res, file)
+
 
     # read json object from drifts.json
     drifts = None

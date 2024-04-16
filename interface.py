@@ -18,6 +18,18 @@ params2 = ['product_name', 'market share', 'units sold to segment', 'revision da
 params_editable = ['product_name', 'revision date', 'performance', 'size',
                    'list price', 'mtbf', 'promo budget', 'sales budget']
 
+
+def generate_style_conditions(df):
+    conditions = []
+    for i in range(len(df)):
+        if df.iloc[i]['product'].startswith('c'):
+            conditions.append({
+                'if': {'row_index': i},
+                'backgroundColor': 'blue',
+                'color': 'white',
+            })
+    return conditions
+
 app.layout = html.Div([
     html.H1("Segment Forecasting"),
     html.Div([
@@ -76,13 +88,27 @@ app.layout = html.Div([
             editable=False,
             style_table={'height': '300px', 'overflowY': 'auto'}
         ),
+
         dash_table.DataTable(
             id='table-display-eoy',
             columns=(
                 [{'id': p, 'name': p} for p in ['product', 'sales', 'share']]
             ),
             editable=False,
-            style_table={'height': '300px', 'overflowY': 'auto'}
+            style_table={'height': '300px', 'overflowY': 'auto'},
+            # style_data_conditional=[
+            #     {
+            #         # Condition: If 'Score' column value is greater than 90
+            #         'if': {
+            #             'filter_query': '{product} ilike "%c" ',
+            #             'column_id': 'product'
+            #         },
+            #         # Formatting: Change the background color of the row
+            #         'backgroundColor': 'blue',
+            #         # Optional: Change text color to improve contrast
+            #         'color': 'white'
+            #     }
+            # ]
         )
     ], style={"width": "100%", "display": "flex", "justify-content": "center", "align-items": "center"})
 ])
@@ -292,6 +318,10 @@ def show_december_data2(segment, rd, nclicks):
 
     dec_data_dict = [{**{param: product[i]
         for i, param in enumerate(params2) if param in params_editable}} for product in seg_data]
+    
+    if ctx.triggered_id != 'btn-debug':
+        for d in dec_data_dict:
+            d['list price'] -= .5
     # add 3 blank rows to dec_data_dict
     for i in range(5):
         dec_data_dict.append({param: '' for param in params_editable})

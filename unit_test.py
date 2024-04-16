@@ -1,7 +1,7 @@
 from functions import *
 from forechester import score
 from loader import load
-from html_parser import parse_primary_segments
+from html_parser import parse_primary_segments, parse_html_prefs
 from pdf_to_prodlist import parse_primary_segments_from_pdf
 # original_str = "$C$34, P14/$C$40 * ($C$35*$C$36^C41) / 12,"
 
@@ -57,4 +57,4 @@ def unit_test_marketing():
 params2 = ['name', 'market share', 'units sold to segment', 'revision date', 'stock out', 'performance', 'size',
            'list price', 'mtbf', 'age dec 31', 'promo budget', 'awareness', 'sales budget', 'accessibility', 'dec cust survey']
 
-parse_primary_segments_from_pdf(2, 93)
+parse_html_prefs(4, "high-end")

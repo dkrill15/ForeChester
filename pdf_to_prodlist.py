@@ -6,8 +6,10 @@ import pandas as pd
 import json
 from html_parser import naming
 
-pdfFileObj = open('/Users/danielkrill/eg-business/couriers/pdf/933.pdf', 'rb')
-ROUND_NUM = 3
+
+
+pdfFileObj = open('/Users/danielkrill/eg-business/couriers/pdf/928.pdf', 'rb')
+ROUND_NUM = 8
 location = 1
 
 # creating a pdf reader object
